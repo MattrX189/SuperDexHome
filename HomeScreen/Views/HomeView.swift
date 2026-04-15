@@ -15,11 +15,11 @@ struct HomeView: View {
                     VStack(alignment: .leading, spacing: 16) {
                         // Greeting section
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("Hello, Vanessa")
+                            Text("Hello, Gaurang")
                                 .font(.largeTitle)
                                 .fontWeight(.bold)
 
-                            Text("Welcome to TripSlide")
+                            Text("Welcome to SuperDex")
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
                         }
