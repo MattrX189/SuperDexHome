@@ -315,53 +315,139 @@ struct ProfileCardsView: View {
     @State private var profiles: [ProfileCard] = sampleProfiles
     @State private var dragOffset: CGSize = .zero
     @Binding var selectedProfile: ProfileCard?
+    @State private var currentIndex: Int = 0
 
     init(selectedProfile: Binding<ProfileCard?> = .constant(nil)) {
         _selectedProfile = selectedProfile
     }
 
     var body: some View {
-        ZStack {
-            ForEach(Array(profiles.enumerated().prefix(4).reversed()), id: \.element.id) { index, profile in
-                let isTop = index == 0
+        GeometryReader { geo in
+            let containerWidth = geo.size.width
+            let containerHeight = geo.size.height
 
-                ProfileCardView(profile: profile)
-                    .scaleEffect(1 - CGFloat(index) * 0.05)
-                    .offset(y: CGFloat(index) * 12)
-                    .offset(x: isTop ? dragOffset.width : 0)
-                    .rotationEffect(isTop ? .degrees(Double(dragOffset.width) / 20) : .zero)
-                    .animation(.spring(response: 0.4, dampingFraction: 0.75), value: dragOffset)
-                    .onTapGesture {
-                        if isTop {
-                            selectedProfile = profile
+            // Center card size
+            let centerWidth = min(300, containerWidth * 0.72)
+            let centerHeight = min(420, containerHeight * 0.95)
+
+            // How much side cards peek
+            let sidePeek: CGFloat = max(24, containerWidth * 0.08)
+            let sideScale: CGFloat = 0.9
+            let sideYOffset: CGFloat = 18
+
+            ZStack {
+                // We render all items and compute each card's relative position to currentIndex
+                ForEach(Array(profiles.enumerated()), id: \.element.id) { idx, profile in
+                    let relative = relativePosition(of: idx)
+                    let isCenter = relative == 0
+
+                    // Base X offset for left/right positions (center at 0)
+                    let baseX: CGFloat = {
+                        switch relative {
+                        case 0: return 0
+                        case -1: return -((centerWidth / 2) + sidePeek)
+                        case 1: return (centerWidth / 2) + sidePeek
+                        default:
+                            // Offscreen for other items
+                            return relative < 0 ? -containerWidth : containerWidth
                         }
-                    }
-                    .gesture(
-                        isTop ? DragGesture()
-                            .onChanged { value in
-                                dragOffset = value.translation
-                            }
-                            .onEnded { value in
-                                if abs(value.translation.width) > 120 {
-                                    let direction: CGFloat = value.translation.width > 0 ? 1 : -1
-                                    withAnimation(.easeIn(duration: 0.25)) {
-                                        dragOffset = CGSize(width: direction * 500, height: 0)
+                    }()
+
+                    // Apply drag only to the center card to create interactive transition
+                    let dragX = isCenter ? dragOffset.width : 0
+
+                    // Scale and vertical offset for depth effect
+                    let scale: CGFloat = isCenter ? 1.0 : sideScale
+                    let yOffset: CGFloat = isCenter ? 0 : sideYOffset
+                    let opacity: Double = abs(relative) <= 1 ? 1.0 : 0.0
+
+                    ProfileCardView(profile: profile)
+                        .frame(width: centerWidth, height: centerHeight)
+                        .scaleEffect(scale)
+                        .offset(x: baseX + dragX, y: yOffset)
+                        .opacity(opacity)
+                        .allowsHitTesting(isCenter) // only center is tappable
+                        .onTapGesture {
+                            if isCenter { selectedProfile = profile }
+                        }
+                        .gesture(
+                            isCenter ? DragGesture()
+                                .onChanged { value in
+                                    dragOffset = value.translation
+                                }
+                                .onEnded { value in
+                                    let threshold = centerWidth * 0.25
+                                    if value.translation.width < -threshold && currentIndex < profiles.count - 1 {
+                                        withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+                                            currentIndex += 1
+                                        }
+                                    } else if value.translation.width > threshold && currentIndex > 0 {
+                                        withAnimation(.spring(response: 0.4, dampingFraction: 0.85)) {
+                                            currentIndex -= 1
+                                        }
                                     }
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-                                        let removed = profiles.removeFirst()
-                                        profiles.append(removed)
-                                        dragOffset = .zero
-                                    }
-                                } else {
-                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                                    withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
                                         dragOffset = .zero
                                     }
                                 }
-                            }
-                        : nil
-                    )
-                    .zIndex(Double(profiles.count - index))
+                            : nil
+                        )
+                        .zIndex(zIndex(for: relative))
+                        .animation(.spring(response: 0.45, dampingFraction: 0.85), value: currentIndex)
+                        .animation(.spring(response: 0.35, dampingFraction: 0.85), value: dragOffset)
+                }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .contentShape(Rectangle())
+            // Optional: arrows (left/right) similar to the mock
+            .overlay(alignment: .leading) {
+                Button(action: {
+                    if currentIndex > 0 {
+                        withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) { currentIndex -= 1 }
+                    }
+                }) {
+                    Image(systemName: "chevron.left")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                        .frame(width: 36, height: 36)
+                        .background(.thinMaterial)
+                        .clipShape(Circle())
+                }
+                .padding(.leading, 8)
+                .opacity(currentIndex > 0 ? 1 : 0.4)
+            }
+            .overlay(alignment: .trailing) {
+                Button(action: {
+                    if currentIndex < profiles.count - 1 {
+                        withAnimation(.spring(response: 0.45, dampingFraction: 0.85)) { currentIndex += 1 }
+                    }
+                }) {
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                        .frame(width: 36, height: 36)
+                        .background(.thinMaterial)
+                        .clipShape(Circle())
+                }
+                .padding(.trailing, 8)
+                .opacity(currentIndex < profiles.count - 1 ? 1 : 0.4)
+            }
+        }
+    }
+
+    private func relativePosition(of index: Int) -> Int {
+        // Normalize relative position to currentIndex; clamp to -1, 0, 1 for left/center/right
+        let rel = index - currentIndex
+        if rel < -1 { return -2 }
+        if rel > 1 { return 2 }
+        return rel
+    }
+
+    private func zIndex(for relative: Int) -> Double {
+        switch relative {
+        case 0: return 3
+        case -1, 1: return 2
+        default: return 1
         }
     }
 }
