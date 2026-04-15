@@ -1,8 +1,6 @@
 //
-//  HProfileCard.swift
+//  HProfileCardsView.swift
 //  HomeScreen
-//
-//  Created by Gaurang Pant on 15/04/26.
 //
 
 import SwiftUI
@@ -12,7 +10,6 @@ struct HProfileCardView: View {
 
     var body: some View {
         ZStack {
-            // Gradient background
             RoundedRectangle(cornerRadius: 20)
                 .fill(
                     LinearGradient(
@@ -22,7 +19,6 @@ struct HProfileCardView: View {
                     )
                 )
 
-            // Decorative glowing circles
             Circle()
                 .fill(profile.theme.accentColor.opacity(0.15))
                 .frame(width: 140, height: 140)
@@ -35,13 +31,10 @@ struct HProfileCardView: View {
                 .blur(radius: 30)
                 .offset(x: 140, y: 40)
 
-            // Border
             RoundedRectangle(cornerRadius: 20)
                 .strokeBorder(.white.opacity(0.1), lineWidth: 1)
 
-            // Content — horizontal layout
             HStack(spacing: 12) {
-                // Left: Avatar + Name + Role
                 VStack(spacing: 8) {
                     Image(systemName: "person.circle.fill")
                         .font(.system(size: 44))
@@ -63,13 +56,11 @@ struct HProfileCardView: View {
                 }
                 .frame(width: 100)
 
-                // Divider
                 Rectangle()
                     .fill(.white.opacity(0.15))
                     .frame(width: 1)
                     .padding(.vertical, 16)
 
-                // Right: Bio + Social buttons
                 VStack(spacing: 12) {
                     Text(profile.bio)
                         .font(.caption)
@@ -77,13 +68,11 @@ struct HProfileCardView: View {
                         .lineLimit(2)
                         .frame(maxWidth: .infinity, alignment: .leading)
 
-                    // Contact row
                     HStack(spacing: 8) {
                         SocialButton(icon: .system("phone.fill"), label: "Phone", urlString: "tel:\(profile.phone.replacingOccurrences(of: " ", with: ""))")
                         SocialButton(icon: .system("envelope.fill"), label: "Email", urlString: "mailto:\(profile.email)")
                     }
 
-                    // Social icons row
                     HStack(spacing: 8) {
                         SocialIconButton(icon: .brand("instagram"), urlString: "https://instagram.com/\(profile.instagram.replacingOccurrences(of: "@", with: ""))")
                         SocialIconButton(icon: .brand("linkedin"), urlString: "https://\(profile.linkedin)")

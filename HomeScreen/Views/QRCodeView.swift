@@ -6,25 +6,22 @@
 //
 
 import SwiftUI
-import CoreImage.CIFilterBuiltins
 
 struct QRCodeView: View {
-    @State private var profile = UserProfileData.load()
+    @State private var viewModel = QRCodeViewModel()
 
     var body: some View {
         NavigationStack {
             ZStack {
-                // Background gradient from user's theme
                 LinearGradient(
-                    colors: profile.theme.gradientColors,
+                    colors: viewModel.profile.theme.gradientColors,
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )
                 .ignoresSafeArea()
 
-                // Decorative orbs
                 Circle()
-                    .fill(profile.theme.accentColor.opacity(0.15))
+                    .fill(viewModel.profile.theme.accentColor.opacity(0.15))
                     .frame(width: 250, height: 250)
                     .blur(radius: 60)
                     .offset(x: -120, y: -200)
@@ -38,8 +35,7 @@ struct QRCodeView: View {
                 VStack(spacing: 24) {
                     Spacer()
 
-                    if profile.name.isEmpty {
-                        // Empty state
+                    if viewModel.profile.name.isEmpty {
                         VStack(spacing: 16) {
                             Image(systemName: "qrcode")
                                 .font(.system(size: 60))
@@ -56,14 +52,13 @@ struct QRCodeView: View {
                                 .multilineTextAlignment(.center)
                         }
                     } else {
-                        // Name
-                        Text(profile.name)
+                        Text(viewModel.profile.name)
                             .font(.title)
                             .fontWeight(.bold)
                             .foregroundStyle(.white)
 
-                        if !profile.jobRole.isEmpty {
-                            Text(profile.jobRole)
+                        if !viewModel.profile.jobRole.isEmpty {
+                            Text(viewModel.profile.jobRole)
                                 .font(.subheadline)
                                 .fontWeight(.medium)
                                 .foregroundStyle(.white.opacity(0.7))
@@ -73,8 +68,7 @@ struct QRCodeView: View {
                                 .clipShape(Capsule())
                         }
 
-                        // QR Code card
-                        if let qrImage = generateQRCode() {
+                        if let qrImage = viewModel.generateQRCode() {
                             VStack(spacing: 16) {
                                 Image(uiImage: qrImage)
                                     .interpolation(.none)
@@ -100,23 +94,9 @@ struct QRCodeView: View {
             .navigationTitle("My QR Code")
             .toolbarColorScheme(.dark, for: .navigationBar)
             .onAppear {
-                profile = UserProfileData.load()
+                viewModel.reloadProfile()
             }
         }
-    }
-
-    private func generateQRCode() -> UIImage? {
-        let vcard = "BEGIN:VCARD\nVERSION:3.0\nFN:\(profile.name)\nTITLE:\(profile.jobRole)\nTEL:\(profile.phone)\nEMAIL:\(profile.email)\nURL:https://\(profile.github)\nEND:VCARD"
-        let filter = CIFilter.qrCodeGenerator()
-        guard let data = vcard.data(using: .utf8) else { return nil }
-        filter.message = data
-        filter.correctionLevel = "H"
-        guard let ciImage = filter.outputImage else { return nil }
-        let transform = CGAffineTransform(scaleX: 10, y: 10)
-        let scaledImage = ciImage.transformed(by: transform)
-        let context = CIContext()
-        guard let cgImage = context.createCGImage(scaledImage, from: scaledImage.extent) else { return nil }
-        return UIImage(cgImage: cgImage)
     }
 }
 

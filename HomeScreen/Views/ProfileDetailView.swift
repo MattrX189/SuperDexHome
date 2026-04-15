@@ -19,7 +19,6 @@ struct ProfileDetailView: View {
 
                 // -- CARD SECTION --
                 ZStack {
-                    // Card background
                     RoundedRectangle(cornerRadius: 28)
                         .fill(
                             LinearGradient(
@@ -29,7 +28,6 @@ struct ProfileDetailView: View {
                             )
                         )
 
-                    // Decorative orbs
                     Circle()
                         .fill(profile.theme.accentColor.opacity(0.2))
                         .frame(width: 200, height: 200)
@@ -42,15 +40,12 @@ struct ProfileDetailView: View {
                         .blur(radius: 40)
                         .offset(x: 110, y: 100)
 
-                    // Border
                     RoundedRectangle(cornerRadius: 28)
                         .strokeBorder(.white.opacity(0.12), lineWidth: 1)
 
-                    // Card content
                     VStack(spacing: 16) {
                         Spacer().frame(height: 8)
 
-                        // Avatar
                         ZStack {
                             Circle()
                                 .fill(.white.opacity(0.12))
@@ -60,12 +55,10 @@ struct ProfileDetailView: View {
                                 .foregroundStyle(.white.opacity(0.9))
                         }
 
-                        // Name
                         Text(profile.name)
                             .font(.system(size: 32, weight: .bold))
                             .foregroundStyle(.white)
 
-                        // Job role
                         Text(profile.jobRole)
                             .font(.subheadline)
                             .fontWeight(.semibold)
@@ -75,7 +68,6 @@ struct ProfileDetailView: View {
                             .background(.white.opacity(0.18))
                             .clipShape(Capsule())
 
-                        // Bio
                         Text(profile.bio)
                             .font(.callout)
                             .foregroundStyle(.white.opacity(0.6))
@@ -117,7 +109,6 @@ struct ProfileDetailView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 4)
 
-                    // Row 1: Phone & Email
                     HStack(spacing: 12) {
                         ContactTile(icon: "phone.fill", label: "Phone", value: profile.phone, color: .green) {
                             if let url = URL(string: "tel:\(profile.phone.replacingOccurrences(of: " ", with: ""))") {
@@ -132,7 +123,6 @@ struct ProfileDetailView: View {
                         }
                     }
 
-                    // Row 2: Instagram & LinkedIn
                     HStack(spacing: 12) {
                         ContactTile(icon: "camera.fill", label: "Instagram", value: profile.instagram, color: .pink) {
                             if let url = URL(string: "https://instagram.com/\(profile.instagram.replacingOccurrences(of: "@", with: ""))") {
@@ -147,7 +137,6 @@ struct ProfileDetailView: View {
                         }
                     }
 
-                    // Row 3: X & GitHub
                     HStack(spacing: 12) {
                         ContactTile(icon: "at", label: "X", value: profile.x, color: Color(.label)) {
                             if let url = URL(string: "https://x.com/\(profile.x.replacingOccurrences(of: "@", with: ""))") {
@@ -201,45 +190,6 @@ struct ProfileDetailView: View {
         let context = CIContext()
         guard let cgImage = context.createCGImage(scaledImage, from: scaledImage.extent) else { return nil }
         return UIImage(cgImage: cgImage)
-    }
-}
-
-// MARK: - Contact Tile (Phone / Email)
-
-struct ContactTile: View {
-    let icon: String
-    let label: String
-    let value: String
-    let color: Color
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            VStack(alignment: .leading, spacing: 10) {
-                Image(systemName: icon)
-                    .font(.title3)
-                    .foregroundStyle(.white)
-                    .frame(width: 40, height: 40)
-                    .background(color.gradient)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-
-                Text(label)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-
-                Text(value)
-                    .font(.footnote)
-                    .fontWeight(.medium)
-                    .foregroundStyle(.primary)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(14)
-            .background(Color(.secondarySystemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 16))
-        }
-        .buttonStyle(.plain)
     }
 }
 
