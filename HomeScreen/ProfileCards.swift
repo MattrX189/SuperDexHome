@@ -41,7 +41,7 @@ struct ProfileCard: Identifiable, Hashable {
     let theme: CardTheme
 }
 
-private let sampleProfiles: [ProfileCard] = [
+let sampleProfiles: [ProfileCard] = [
     ProfileCard(name: "Ben", jobRole: "iOS Developer", bio: "Building delightful apps one pixel at a time.", phone: "+1 (555) 100-2001", email: "ben@example.com", instagram: "@ben.dev", linkedin: "linkedin.com/in/ben", x: "@ben_dev", github: "github.com/ben", theme: CardTheme.themes[0]),
     ProfileCard(name: "Sara", jobRole: "UX Designer", bio: "Designing experiences that feel like magic.", phone: "+1 (555) 200-3002", email: "sara@example.com", instagram: "@sara.ux", linkedin: "linkedin.com/in/sara", x: "@sara_ux", github: "github.com/sara", theme: CardTheme.themes[1]),
     ProfileCard(name: "Alex", jobRole: "Backend Engineer", bio: "Scaling systems and solving hard problems.", phone: "+1 (555) 300-4003", email: "alex@example.com", instagram: "@alex.code", linkedin: "linkedin.com/in/alex", x: "@alex_code", github: "github.com/alex", theme: CardTheme.themes[2]),

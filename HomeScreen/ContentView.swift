@@ -182,6 +182,7 @@ struct GroupCardView: View {
     var isExpanded: Bool = false
     @Binding var selectedProfile: ProfileCard?
     var onHeaderTap: () -> Void = {}
+    @State private var isListLayout = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -231,6 +232,22 @@ struct GroupCardView: View {
 
                     Spacer()
 
+                    if isExpanded {
+                        Button {
+                            withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                                isListLayout.toggle()
+                            }
+                        } label: {
+                            Image(systemName: isListLayout ? "rectangle.grid.1x2.fill" : "square.grid.2x2.fill")
+                                .font(.subheadline)
+                                .fontWeight(.semibold)
+                                .foregroundStyle(group.color)
+                                .padding(10)
+                                .background(group.color.opacity(0.15))
+                                .clipShape(Circle())
+                        }
+                    }
+
                     Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
                         .font(.subheadline)
                         .fontWeight(.semibold)
@@ -252,10 +269,17 @@ struct GroupCardView: View {
                 Divider()
                     .padding(.horizontal, 16)
 
-                ProfileCardsView(selectedProfile: $selectedProfile)
-                    .frame(height: 380)
-                    .padding(.vertical, 16)
-                    .transition(.opacity.combined(with: .scale(scale: 0.95, anchor: .top)))
+                if isListLayout {
+                    HProfileCardsView(selectedProfile: $selectedProfile)
+                        .frame(maxHeight: 600)
+                        .padding(.vertical, 16)
+                        .transition(.opacity.combined(with: .scale(scale: 0.95, anchor: .top)))
+                } else {
+                    ProfileCardsView(selectedProfile: $selectedProfile)
+                        .frame(height: 380)
+                        .padding(.vertical, 16)
+                        .transition(.opacity.combined(with: .scale(scale: 0.95, anchor: .top)))
+                }
             }
         }
         .background(Color(.systemBackground))
