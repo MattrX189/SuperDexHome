@@ -40,7 +40,7 @@ struct HProfileCardView: View {
                 .strokeBorder(.white.opacity(0.1), lineWidth: 1)
 
             // Content — horizontal layout
-            HStack(spacing: 16) {
+            HStack(spacing: 12) {
                 // Left: Avatar + Name + Role
                 VStack(spacing: 8) {
                     Image(systemName: "person.circle.fill")
@@ -61,7 +61,7 @@ struct HProfileCardView: View {
                         .background(.white.opacity(0.15))
                         .clipShape(Capsule())
                 }
-                .frame(width: 110)
+                .frame(width: 100)
 
                 // Divider
                 Rectangle()
@@ -92,11 +92,11 @@ struct HProfileCardView: View {
                     }
                 }
             }
-            .padding(16)
+            .padding(12)
         }
         .frame(height: 180)
         .clipShape(RoundedRectangle(cornerRadius: 20))
-        .shadow(color: profile.theme.gradientColors.first?.opacity(0.35) ?? .black.opacity(0.3), radius: 14, y: 8)
+        .shadow(color: profile.theme.gradientColors.first?.opacity(0.2) ?? .black.opacity(0.15), radius: 6, y: 4)
     }
 }
 
@@ -118,8 +118,8 @@ struct HProfileCardsView: View {
                         }
                 }
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 16)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 12)
         }
     }
 }
