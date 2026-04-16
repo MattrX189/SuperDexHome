@@ -12,8 +12,59 @@ struct ProfileDetailView: View {
     let profile: ProfileCard
     @Environment(\.openURL) private var openURL
     @Environment(\.dismiss) private var dismiss
+    @State private var selectedTab = 0
 
     var body: some View {
+        VStack(spacing: 0) {
+            // Custom Tab Bar
+            HStack(spacing: 0) {
+                TabButton(title: "Profile", icon: "person.fill", isSelected: selectedTab == 0) {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        selectedTab = 0
+                    }
+                }
+                
+                TabButton(title: "History", icon: "calendar.badge.clock", isSelected: selectedTab == 1) {
+                    withAnimation(.easeInOut(duration: 0.2)) {
+                        selectedTab = 1
+                    }
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 8)
+            .background(Color(.systemBackground))
+            .shadow(color: .black.opacity(0.05), radius: 2, y: 1)
+            
+            // Tab Content
+            TabView(selection: $selectedTab) {
+                profileTabContent
+                    .tag(0)
+                
+                MeetingHistoryView(meetings: profile.meetings)
+                    .tag(1)
+            }
+            .tabViewStyle(.page(indexDisplayMode: .never))
+        }
+        .background(Color(.systemGroupedBackground))
+        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarBackButtonHidden(true)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                Button {
+                    dismiss()
+                } label: {
+                    HStack(spacing: 4) {
+                        Image(systemName: "chevron.left")
+                            .font(.system(size: 16, weight: .semibold))
+                        Text("Back")
+                            .font(.body)
+                    }
+                }
+            }
+        }
+    }
+    
+    private var profileTabContent: some View {
         ScrollView(showsIndicators: false) {
             VStack(spacing: 0) {
 
@@ -157,22 +208,6 @@ struct ProfileDetailView: View {
             }
         }
         .background(Color(.systemGroupedBackground))
-        .navigationBarTitleDisplayMode(.inline)
-        .navigationBarBackButtonHidden(true)
-        .toolbar {
-            ToolbarItem(placement: .navigationBarLeading) {
-                Button {
-                    dismiss()
-                } label: {
-                    HStack(spacing: 4) {
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 16, weight: .semibold))
-                        Text("Back")
-                            .font(.body)
-                    }
-                }
-            }
-        }
     }
 
     private var qrContent: String {
@@ -193,6 +228,39 @@ struct ProfileDetailView: View {
     }
 }
 
+// MARK: - Tab Button Component
+struct TabButton: View {
+    let title: String
+    let icon: String
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            VStack(spacing: 6) {
+                Image(systemName: icon)
+                    .font(.system(size: 20))
+                
+                Text(title)
+                    .font(.caption)
+                    .fontWeight(.medium)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .foregroundStyle(isSelected ? Color.accentColor : .secondary)
+            .background(
+                VStack {
+                    Spacer()
+                    Rectangle()
+                        .fill(Color.accentColor)
+                        .frame(height: 2)
+                        .opacity(isSelected ? 1 : 0)
+                }
+            )
+        }
+    }
+}
+
 #Preview {
     NavigationStack {
         ProfileDetailView(
@@ -206,7 +274,8 @@ struct ProfileDetailView: View {
                 linkedin: "linkedin.com/in/ben",
                 x: "@ben_dev",
                 github: "github.com/ben",
-                theme: CardTheme.themes[1]
+                theme: CardTheme.themes[1],
+                meetings: EventMeeting.sampleMeetings
             )
         )
     }
